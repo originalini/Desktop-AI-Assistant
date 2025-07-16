@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(My_AI-Assistent)
+
+set(WXWIDGETS_CPP_DIR C:/Users/pipet/source/repos/My_AI-Assistent/library/wxWidgets)
+set(LLAMA_CPP_DIR C:/Users/pipet/source/repos/My_AI-Assistent/library/llama.cpp-b5782)
+
+add_subdirectory(${WXWIDGETS_CPP_DIR} ${CMAKE_BINARY_DIR}/wxWidgets)
+add_subdirectory(${LLAMA_CPP_DIR} ${CMAKE_BINARY_DIR}/llama)
+
+add_executable(${PROJECT_NAME} WIN32    source/UI_manager.h
+                                        source/UI_manager.cpp
+                                        source/run_model.cpp
+                                        source/run_model.h
+                                        source/Window.cpp
+                                        source/Window.h
+                                        source/CastomEvent.h
+                                        source/CastomEvent.cpp)
+# Найдем Clang-Tidy в системе
+find_program(CLANG_TIDY_EXE clang-tidy)
+
+if(CLANG_TIDY_EXE)
+    # Если Clang-Tidy найден, добавляем его к нашему таргету
+    # Он будет запускаться автоматически при сборке
+    set_target_properties(My_AI-Assistent PROPERTIES
+        CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+
+    # Важно: эта строка говорит CMake, что файл .clang-tidy
+    # лежит в корневой папке и его нужно использовать.
+    # Без этой строки фильтрация может не сработать.
+    # CMAKE_SOURCE_DIR указывает на корень проекта.
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+else()
+    message(WARNING "Clang-Tidy not found.")
+endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE wx::net wx::core wx::base wx::richtext)
+target_link_libraries(${PROJECT_NAME} PRIVATE llama)
