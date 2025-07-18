@@ -4,7 +4,7 @@
 
 MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), 
 													TextStat{ nullptr }, statusLoadModel{ STATUS_LOAD_NOT_LOAD }, 
-													textAI{ nullptr }, volumeMessageAI{ 0 }, indexGenerating{false} {
+													volumeMessageAI{0}, indexGenerating{false} {
 
 	model = new RunModel; // <- Выделение памяти под модель.
 	
@@ -18,6 +18,10 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 	ButtonDisplay(); // <- Вывод кнопок;
 
 	this->SetSizerAndFit(boxSizerMain); // <- Добавляем в Frame главный сайзер(вboxSizerMain);
+
+	messages = new wxRichTextCtrl(scrolledPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 620), wxRE_READONLY);
+	boxSizerMessage->Add(messages, 0 , wxALL | wxEXPAND , 10);
+
 
 	bar->SetStatusText("Загрузка модели...");
 	std::thread LoadModel_th([this]() {
@@ -72,45 +76,15 @@ void MyFrame::ButtonDisplay() {
 void MyFrame::AddMessageUser(std::string messageUser) {
 	messageUser = "Пользователь:\n" + messageUser;
 
-	// Создаем статический текст для вывода сообщения на экран
-	wxFont font(12, wxFONTFAMILY_SWISS, wxNORMAL, wxNORMAL, false, messageUser); // <- Задаем параметры текста(шрифт, размер и т.д).
-	wxStaticText* UserMessage = new wxStaticText(scrolledPanel, wxID_ANY, messageUser, wxDefaultPosition, wxDefaultSize);
-	UserMessage->SetBackgroundColour(wxColour(200, 200, 200));
-	UserMessage->SetFont(font);
-	UserMessage->Wrap(450);
 
-	// Добавляем в сайзер сообщений (boxSizerMessage) ...
-	// Созданный статический текст
-	boxSizerMessage->Add(UserMessage, 0, wxALIGN_RIGHT | wxRIGHT | wxUP, 10); 
 
-	InputText->Clear(); // <- Очищаем строку ввода.
-
-	Layout();
-	Refresh();
 }
 
 void MyFrame::ViewMessageAI(MyEventLoop& event) {
 
-	// Если indexGereting = false, то мы создаем новый виджет для отображения(все это происходит если пользователь отправил сообщение нейросети)
-	// после создания виджета мы присваиваем indexGenerating = true, чтобы при генерации ответа, не создавалось больше виджетов.
-	// Переменная volumeMessageAI хранит в себе номер виджета-объекта с которым нужно работать, также если indexGenerating = false, то мы данное 
-	// значение увеличиваем на 1.
-	if (indexGenerating == false) {
-		++volumeMessageAI;
-		textAI.push_back(new wxStaticText(scrolledPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize));
-		wxFont font(12, wxFONTFAMILY_SWISS, wxNORMAL, wxNORMAL, false, wxEmptyString); // <- Задаем параметры текста(шрифт, размер и т.д).
-		textAI[volumeMessageAI]->SetBackgroundColour(wxColour(200, 200, 200));
-		textAI[volumeMessageAI]->SetDoubleBuffered(true);
-		textAI[volumeMessageAI]->SetFont(font);
 
-		boxSizerMessage->Add(textAI[volumeMessageAI], 0, wxALIGN_LEFT | wxLEFT | wxUP, 10);
-		indexGenerating = true;
-	}
-	textAI[volumeMessageAI]->SetLabel("Нейросеть:\n" + event.GetOutputAI());
-	textAI[volumeMessageAI]->Wrap(450);
 
-	Layout();
-	Refresh();
+
 }
 
 void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {

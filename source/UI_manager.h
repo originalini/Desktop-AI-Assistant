@@ -11,7 +11,8 @@ private:
 
 	int volumeMessageAI; // <- Номер сообщения в массиве textAI
 	void ViewMessageAI(MyEventLoop& event); // <- Вывод сообщения пользователя.
-	std::vector<wxStaticText*> textAI; // <- Массив сообщений нейросети.
+	wxRichTextCtrl* messages;
+
 
 	// @brief Строка состояния для отображения отладочной информации.
 	wxStatusBar* bar;
