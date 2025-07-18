@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/wx.h>
+#include <wx/richtext/richtextctrl.h>
 #include <llama.h>
 
 #include <vector> 
