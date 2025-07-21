@@ -74,17 +74,25 @@ void MyFrame::ButtonDisplay() {
 }
 
 void MyFrame::AddMessageUser(std::string messageUser) {
-	messageUser = "Пользователь:\n" + messageUser;
+	messages->SetInsertionPointEnd();
+	wxRichTextAttr  atrubits;
+	atrubits.SetAlignment(wxTEXT_ALIGNMENT_RIGHT);
+	messages->BeginStyle(atrubits);
 
+	messageUser = "Пользователь:\n" + messageUser + "\n";
 
+	messages->WriteText("\n");
+	messages->WriteText(messageUser);
 
+	messages->EndStyle();
+
+	messages->WriteText("Нейросеть:\n");
 }
 
 void MyFrame::ViewMessageAI(MyEventLoop& event) {
-
-
-
-
+	messages->SetInsertionPointEnd();
+	std::string messageAI = event.GetOutputAI();
+	messages->WriteText(messageAI);
 }
 
 void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
