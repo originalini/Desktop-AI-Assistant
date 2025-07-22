@@ -91,9 +91,8 @@ void MyFrame::AddMessageUser(std::string messageUser) {
 
 	messages->EndStyle();
 
-	messages->WriteText("Нейросеть:\n");
-
 	messages->SetInsertionPointEnd();
+	messages->WriteText("Нейросеть:\n");
 }
 
 void MyFrame::ViewMessageAI(MyEventLoop& event) {
