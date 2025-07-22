@@ -20,6 +20,10 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 	this->SetSizerAndFit(boxSizerMain); // <- Добавляем в Frame главный сайзер(вboxSizerMain);
 
 	messages = new wxRichTextCtrl(scrolledPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(-1, 620), wxRE_READONLY);
+	wxFont font(13, wxDEFAULT, wxNORMAL, wxNORMAL, false);
+	messages->SetFont(font);
+
+
 	boxSizerMessage->Add(messages, 0 , wxALL | wxEXPAND , 10);
 
 
@@ -75,24 +79,35 @@ void MyFrame::ButtonDisplay() {
 
 void MyFrame::AddMessageUser(std::string messageUser) {
 	messages->SetInsertionPointEnd();
+	
 	wxRichTextAttr  atrubits;
 	atrubits.SetAlignment(wxTEXT_ALIGNMENT_RIGHT);
+
 	messages->BeginStyle(atrubits);
 
 	messageUser = "Пользователь:\n" + messageUser + "\n";
 
-	messages->WriteText("\n");
 	messages->WriteText(messageUser);
 
 	messages->EndStyle();
 
 	messages->WriteText("Нейросеть:\n");
+
+	messages->SetInsertionPointEnd();
 }
 
 void MyFrame::ViewMessageAI(MyEventLoop& event) {
 	messages->SetInsertionPointEnd();
+	wxRichTextAttr atrubits;
+	atrubits.SetAlignment(wxTEXT_ALIGNMENT_LEFT);
+
+	messages->BeginStyle(atrubits);
+	
 	std::string messageAI = event.GetOutputAI();
 	messages->WriteText(messageAI);
+	
+	messages->EndStyle();
+	messages->SetInsertionPointEnd();
 }
 
 void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
