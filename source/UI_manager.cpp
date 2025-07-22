@@ -97,6 +97,7 @@ void MyFrame::AddMessageUser(std::string messageUser) {
 
 void MyFrame::ViewMessageAI(MyEventLoop& event) {
 	messages->SetInsertionPointEnd();
+
 	wxRichTextAttr atrubits;
 	atrubits.SetAlignment(wxTEXT_ALIGNMENT_LEFT);
 
@@ -113,6 +114,7 @@ void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
 	// Проверка пустая ли строка и присвоен ли ей статус готовности к общению с пользователем.
 	if (!InputText->IsEmpty() && (statusLoadModel == STATUS_LOAD_COMPLETE || statusLoadModel == STATUS_READY_GET_MESSAGE_USER)) {
 		std::string Message = InputText->GetValue(); // <- Достаем введенное сообщение с виджета ввода(InputText).
+		InputText->Clear();
 
 		AddMessageUser(Message); // <- Добавляем сообщения для его вывода на экран.
 

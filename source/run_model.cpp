@@ -152,6 +152,9 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         batch = llama_batch_get_one(&new_token_id, 1);
     }
 
+    evt.SetOutputAI("\n");
+
+    wxQueueEvent(frame, evt.Clone());
 
 
     frame->indexGenerating = false;
