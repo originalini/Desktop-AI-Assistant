@@ -18,8 +18,8 @@
 ### 1. Клонируйте репозиторий:
 
 ```bash
-git clone https://github.com/ваш-логин/ваш-репозиторий.git
-cd ваш-репозиторий
+git clone https://github.com/originalini/Desktop-AI-Assistant.git
+cd "Your file"
 ```
 
 ### 2. Создайте папку для сборки и запустите CMake:
