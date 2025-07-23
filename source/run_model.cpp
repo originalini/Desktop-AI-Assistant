@@ -143,7 +143,7 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         printf("%s", piece.c_str());
         fflush(stdout);
         response += piece;
-
+       
         evt.SetOutputAI(piece);
 
         wxQueueEvent(frame, evt.Clone());
@@ -156,8 +156,6 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
 
     wxQueueEvent(frame, evt.Clone());
 
-
-    frame->indexGenerating = false;
     frame->statusLoadModel = STATUS_READY_GET_MESSAGE_USER;
 
     return response;

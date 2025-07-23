@@ -2,9 +2,12 @@
 #include "UI_manager.h"
 #include "run_model.h"
 
+MyFrame::~MyFrame() {
+	delete model;
+}
+
 MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), 
-													TextStat{ nullptr }, statusLoadModel{ STATUS_LOAD_NOT_LOAD }, 
-													volumeMessageAI{0}, indexGenerating{false} {
+										  TextStat{ nullptr }, statusLoadModel{ STATUS_LOAD_NOT_LOAD } {
 
 	model = new RunModel; // <- Выделение памяти под модель.
 	
@@ -23,9 +26,7 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 	wxFont font(13, wxDEFAULT, wxNORMAL, wxNORMAL, false);
 	messages->SetFont(font);
 
-
 	boxSizerMessage->Add(messages, 0 , wxALL | wxEXPAND , 10);
-
 
 	bar->SetStatusText("Загрузка модели...");
 	std::thread LoadModel_th([this]() {
@@ -46,10 +47,8 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 void MyFrame::MessageDisplay() {
 	boxSizerMessage = new wxBoxSizer(wxVERTICAL); // <- Сайзер сообщений;
 
-	scrolledPanel = new wxScrolled<wxPanel>(this, wxID_ANY); // <- Панель для прокручивания сообщений если превышает размер.
+	scrolledPanel = new wxPanel(this, wxID_ANY); // <- Панель для вывода сообщений.
 	scrolledPanel->SetDoubleBuffered(true);
-
-	scrolledPanel->SetScrollRate(0, 10);
 
 	boxSizerMain->Add(scrolledPanel, 1, wxEXPAND); // <- Добавляем в главный сайзер scrolledPanel;
 
