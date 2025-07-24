@@ -110,6 +110,7 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
     // prepare a batch for the prompt
     llama_batch batch = llama_batch_get_one(prompt_tokens.data(), prompt_tokens.size());
     llama_token new_token_id;
+
     while (true) {
         // check if we have enough space in the context to evaluate this batch
         int n_ctx = llama_n_ctx(ctx);
@@ -142,9 +143,8 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         printf("%s", piece.c_str());
         fflush(stdout);
         response += piece;
-
-
-        evt.SetOutputAI(response);
+       
+        evt.SetOutputAI(piece);
 
         wxQueueEvent(frame, evt.Clone());
 
@@ -152,7 +152,10 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         batch = llama_batch_get_one(&new_token_id, 1);
     }
 
-    frame->indexGenerating = false;
+    evt.SetOutputAI("\n");
+
+    wxQueueEvent(frame, evt.Clone());
+
     frame->statusLoadModel = STATUS_READY_GET_MESSAGE_USER;
 
     return response;

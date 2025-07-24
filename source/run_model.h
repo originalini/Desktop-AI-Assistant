@@ -6,7 +6,7 @@ class MyFrame;
 
 class RunModel {
 private:
-	std::string model_path;				// <- Путь до модели "C\\:..."
+	std::string model_path;				// <- Путь до модели "C\\:..."Ы
 	int ngl;							// <- Количество слоев загружаемых в видеокарту или ОЗУ
 	int n_ctx;							// <- Размер контекста диалога.
 
@@ -15,7 +15,7 @@ private:
 	const llama_vocab* vocab;			// <- Словарь модели
 	llama_context_params ctx_params;	// <- Параметры контекста модели
 	llama_context* ctx;					// <- Сам контекст
-	llama_sampler* smpl;				// <- Параметры для отбора предсказаных токенов(температура и т.д)
+	llama_sampler* smpl;				// <- Параметры для отбора предсказаных токенов( а также установка температуры и т.д)
 
 	std::vector<llama_chat_message> messages; // <- Чат с нейросетью
 	std::vector<char> formatted;
@@ -45,11 +45,13 @@ public:
 	*/
 	std::string TokenizationMessage(std::string message);
 
-	/// <summary>
-	/// Генерация сообщения нейросетью.
-	/// </summary>
-	/// <param name="prompt"> - отправленное пользователем сообщения(заранее приведенное в формат 
-	/// для нейросети функцией - TokenizationMessage());</param>
-	/// <returns>Возвращается сгенерированный ответ нейросетью </returns>
+	/* 
+	* @brief Генерация сообщения нейросетью.
+	* 
+	* @param prompt - отправленное пользователем сообщения(заранее приведенное в формат 
+	* для нейросети функцией - TokenizationMessage());
+	* 
+	* @returns Возвращается сгенерированный ответ нейросетью 
+	*/
 	std::string GenerateOutput(std::string prompt, MyFrame* frame);
 };

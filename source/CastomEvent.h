@@ -3,7 +3,9 @@
 #include "Window.h"
 
 wxDECLARE_EVENT(myEvent_CheckStatusLoadModel, MyEventLoop);
+
 wxDECLARE_EVENT(myEvent_GenerateMessage, MyEventLoop);
+
 wxDECLARE_EVENT(myEvent_MessageAiView, MyEventLoop);
 
 class MyEventLoop : public wxCommandEvent {
@@ -12,12 +14,8 @@ public:
 	virtual wxEvent* Clone() const { return new MyEventLoop(*this); }
 
 
-	bool indexGenerating;
-
-	/// <summary>
-	/// Устанавливает сгенерированный нейросетью текст.
-	/// </summary>
-	/// <param name="outputAI"></param>
+	/// @breif Устанавливает сгенерированный нейросетью текст.
+	/// @param outputAI - хранит значение вывода нейросети.
 	void SetOutputAI(std::string outputAI);
 	
 	

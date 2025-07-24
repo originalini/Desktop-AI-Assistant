@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Window.h"
 
 class MyEventLoop;
@@ -9,15 +8,19 @@ class RunModel;
 class MyFrame : public wxFrame {
 private:
 
-	int volumeMessageAI; // <- Номер сообщения в массиве textAI
-	void ViewMessageAI(MyEventLoop& event); // <- Вывод сообщения пользователя.
-	std::vector<wxStaticText*> textAI; // <- Массив сообщений нейросети.
+	std::thread generateMessageAI_th;
+	std::thread LoadModel_th;
+
+	void WindowClose(wxCloseEvent& evt);
+
+	// @brief Поле для отображния и прокручивания сообщений.
+	wxRichTextCtrl* messages;
 
 	// @brief Строка состояния для отображения отладочной информации.
 	wxStatusBar* bar;
 
-	// @brief Панель для прокручивания сообщений либо пользователя, либо сгенерированных нейросетью.
-	wxScrolled<wxPanel>* scrolledPanel;
+	// @brief Панель для вывода сообщений либо пользователя, либо сгенерированных нейросетью.
+	wxPanel* scrolledPanel;
 
 	// @brief Панель для отображения элементов управления(зона для написания смс и кнопка для отправки).
 	wxPanel* PanelButton;
@@ -50,29 +53,21 @@ private:
 	// @param messageUser - сообщение пользователя 
 	void AddMessageUser(std::string messageUser); // Добавления сообщения пользователя.
 
+	// @brief Добавляет сообщения нейросети на экран вывода.
+	void ViewMessageAI(MyEventLoop& event);
+
 	// @brief Проверка статуса загрузки модели и вывод результата в строку состояния.
 	// @param event - используется для обработки кастомных событий;
 	void ShowStatusLoadModelInStatusBar(MyEventLoop& event);
 
 public:
 	MyFrame(const wxString&);
+	~MyFrame();
 
-	// Переменная которая хранит состояние модели, а именно
-	// если true - то модель генерирует ответ
-	// если false - то модель не генерирует ответ.
-	// Смотреть функцию ViewMessageAI() там данная переменная применяется для вывода сообщения нейросети.
-	bool indexGenerating;
-
-	/// <summary>
 	/// Хранит статус загрузки модели.
-	/// </summary>
 	int statusLoadModel;
 
-
-
-	/// <summary>
-	/// Класс для загрузки модели.
-	/// </summary>
+	/// @brief Класс для загрузки модели.
 	RunModel* model;
 
 	/*
