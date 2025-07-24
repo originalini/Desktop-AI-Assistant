@@ -29,7 +29,7 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 	boxSizerMessage->Add(messages, 0 , wxALL | wxEXPAND , 10);
 
 	bar->SetStatusText("Загрузка модели...");
-	std::thread LoadModel_th([this]() {
+	LoadModel_th = std::thread([this]() {
 		statusLoadModel = model->InitAI("C:/Users/pipet/source/repos/My_AI-Assistent/AI-Model/Qwen3-14B-Q4_K_S.gguf", 99, 8192);
 
 		MyEventLoop evt(myEvent_CheckStatusLoadModel, this->GetId());
@@ -37,11 +37,11 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 		evt.SetStatusLoadModel(statusLoadModel);
 		wxQueueEvent(this, evt.Clone());
 	});
-	LoadModel_th.detach(); // <- Выделяем отдельный поток под загрузку модели.
 
 	Button->Bind(wxEVT_BUTTON, &MyFrame::OnSendButtonClickEvent, this); // <- Привязка для обработки нажатия на клавишу и отправки сообщения.
 	Bind(myEvent_CheckStatusLoadModel, &MyFrame::ShowStatusLoadModelInStatusBar, this); // <- кастомное событие.
 	Bind(myEvent_MessageAiView, &MyFrame::ViewMessageAI, this);
+	Bind(wxEVT_CLOSE_WINDOW, &MyFrame::WindowClose, this);
 }
 
 void MyFrame::MessageDisplay() {
@@ -112,26 +112,40 @@ void MyFrame::ViewMessageAI(MyEventLoop& event) {
 void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
 	// Проверка пустая ли строка и присвоен ли ей статус готовности к общению с пользователем.
 	if (!InputText->IsEmpty() && (statusLoadModel == STATUS_LOAD_COMPLETE || statusLoadModel == STATUS_READY_GET_MESSAGE_USER)) {
-		std::string Message = InputText->GetValue(); // <- Достаем введенное сообщение с виджета ввода(InputText).
+		std::string Message = static_cast<std::string>(InputText->GetValue()); // <- Достаем введенное сообщение с виджета ввода(InputText).
 		InputText->Clear();
 
 		AddMessageUser(Message); // <- Добавляем сообщения для его вывода на экран.
 
 		bar->SetStatusText("Генерация ответа...");
-		std::thread generateMessageAI_th([this, Message]() {
+		generateMessageAI_th = std::thread([this, Message]() {
 			statusLoadModel = STATUS_GENERATE_OUTPUT; // <- Присваиваем статус модели "генерация ответа".
 
 			std::string prompt = model->TokenizationMessage(Message);// <- Токенизация сообщения.
 
 			std::string outputAI = model->GenerateOutput(prompt, this);
 		});
-		generateMessageAI_th.detach();
+
 		Refresh(); // <- Перерисовываем элементы (отвечает за цвета).
 		Layout(); // <- Полное обновление всего окна приложения(кроме цвета).
 	}
 	else {
 		return;
 	}
+}
+
+void MyFrame::WindowClose(wxCloseEvent& evt) {
+	this->Hide();
+
+	if (LoadModel_th.joinable()) {
+		LoadModel_th.join();
+	}
+
+	if (generateMessageAI_th.joinable()) {
+		generateMessageAI_th.join();
+	}
+
+	Destroy();
 }
 
 void MyFrame::ShowStatusLoadModelInStatusBar(MyEventLoop& event) {

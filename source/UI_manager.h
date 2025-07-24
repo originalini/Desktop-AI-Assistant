@@ -8,6 +8,11 @@ class RunModel;
 class MyFrame : public wxFrame {
 private:
 
+	std::thread generateMessageAI_th;
+	std::thread LoadModel_th;
+
+	void WindowClose(wxCloseEvent& evt);
+
 	// @brief Поле для отображния и прокручивания сообщений.
 	wxRichTextCtrl* messages;
 
