@@ -63,9 +63,6 @@ private:
 public:
 	MyFrame(const wxString&);
 
-	/// Хранит статус загрузки модели.
-	int statusLoadModel;
-
 	/// @brief Класс для загрузки модели.
 	RunModel* model;
 

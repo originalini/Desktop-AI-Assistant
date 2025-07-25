@@ -14,14 +14,15 @@
 #include "CastomEvent.h"
 
 enum STATUS_MODEL {
-	STATUS_LOAD_NOT_LOAD = -1,													// <- Модель не загружена!
-	STATUS_LOAD_COMPLETE = 0,													// <- Успешная загрузка модели и готова получать сообщение от пользователя;
-	STATUS_READY_GET_MESSAGE_USER = 1,
-	STATUS_ERROR_PATH_EMPTY = 2,												// <- Ошибка загрузки, неверно указан путь(либо вообще пустой);
-	STATUS_ERROR_LOAD_MODEL = 3,												// <- Ошибка загрузки, ошибочно загрузилась модель;
-	STATUS_ERROR_LOAD_VOCAB = 4,												// <- Ошибка загрузки словаря модели;
-	STATUS_ERROR_INIT_CTX = 5,													// <- Ошибка инициализации контекста модели;
-	STATUS_GENERATE_OUTPUT = 6,													// <- Модель генерирует ответ;
+	LOAD_NOT_LOAD = -1,													// <- Модель не загружена!
+	LOAD_COMPLETE = 0,													// <- Успешная загрузка модели и готова получать сообщение от пользователя;
+	READY_GET_MESSAGE_USER = 1,
+	ERROR_PATH_EMPTY = 2,												// <- Ошибка загрузки, неверно указан путь(либо вообще пустой);
+	ERROR_LOAD_MODEL = 3,												// <- Ошибка загрузки, ошибочно загрузилась модель;
+	ERROR_LOAD_VOCAB = 4,												// <- Ошибка загрузки словаря модели;
+	ERROR_INIT_CTX = 5,													// <- Ошибка инициализации контекста модели;
+	GENERATE_OUTPUT = 6,												// <- Модель генерирует ответ;
+	EXIT_THREAD_WIN_CLOSE = 7											// <- Завершение потока закрытием программы
 };
 
 class MyApp : public wxApp {

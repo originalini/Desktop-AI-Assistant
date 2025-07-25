@@ -20,11 +20,22 @@ private:
 	std::vector<llama_chat_message> messages; // <- Чат с нейросетью
 	std::vector<char> formatted;
 	int prev_len;
-public:
+
+	int statusModel;
+
 	std::atomic<bool> flag_stop;
+public:
 
 	RunModel();
 	~RunModel();
+
+
+	void SetFlagStop(bool flag);
+	bool GetFlagStop();
+
+	int GetStatusModel();
+	void SetStatusModel(int stat);
+
 
 	/*	
 	* @brief Инициализация и загрузка модели в оперативную память устройства.
@@ -35,7 +46,7 @@ public:
 	* 
 	* @return Возвращается результат работы функции, смотреть список STATUS_LOAD_MODEl
 	*/
-	int InitAI(std::string path, int n_gpu_layers, int n_context);
+	void InitAI(std::string path, int n_gpu_layers, int n_context);
 
 	/*
 	* @brief Токенизация и приведение сообщения в подходящий формат для нейросети.
@@ -54,5 +65,5 @@ public:
 	* 
 	* @returns Возвращается сгенерированный ответ нейросетью 
 	*/
-	std::string GenerateOutput(std::string prompt, MyFrame* frame);
+	void GenerateOutput(std::string prompt, MyFrame* frame);
 };

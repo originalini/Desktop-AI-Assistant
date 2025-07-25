@@ -2,7 +2,7 @@
 
 RunModel::RunModel() : model{ nullptr }, vocab{ nullptr }, ctx{ nullptr }, 
                        smpl{ nullptr }, formatted{}, prev_len{ 0 }, messages{}, 
-                       model_params{}, ctx_params{}, ngl{ 0 }, n_ctx{ 0 }, flag_stop{false} {
+                       model_params{}, ctx_params{}, ngl{ 0 }, n_ctx{ 0 }, flag_stop{ false }, statusModel{ LOAD_NOT_LOAD } {
 }
 
 RunModel::~RunModel() {
@@ -14,9 +14,27 @@ RunModel::~RunModel() {
     llama_model_free(model);
 }
 
-int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
+void RunModel::SetFlagStop(bool flag) {
+    flag_stop = flag;
+}
+
+bool RunModel::GetFlagStop() {
+    bool flagStop = flag_stop;
+    return flagStop;
+}
+
+void RunModel::SetStatusModel(int stat) {
+    stat = statusModel;
+}
+
+int RunModel::GetStatusModel() {
+    return this->statusModel;
+}
+
+void RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     model_path = path; // <- Путь до модели.
@@ -24,11 +42,13 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
     n_ctx = n_context; // <- Размер контекстного окна.
     
     if (model_path.empty()) { // <- Проверка пустой ли путь до модели.
-        return STATUS_ERROR_PATH_EMPTY;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // Вывод ошибок 
@@ -39,7 +59,8 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
         }, nullptr);
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // инициализация модели
@@ -48,27 +69,32 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
     model_params.n_gpu_layers = ngl;
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     model = llama_model_load_from_file(model_path.c_str(), model_params); // <- Загрузка модели.
     if (!model) { // <- Проверка загрузилась ли модель корректно
-        return STATUS_ERROR_LOAD_MODEL;
+        this->statusModel = ERROR_LOAD_MODEL;
+        return;
     }
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // Это словарь модели(llama_vocab)
     // llama_model_get_vocab(model) - функция, для того чтобы достать словарь из файла модели(.gguf)
     vocab = llama_model_get_vocab(model);
     if (!vocab) {
-        return STATUS_ERROR_LOAD_VOCAB;
+        this->statusModel = ERROR_LOAD_VOCAB;
+        return;
     }
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // Тут задаются параметры  для контекста(llama_contexr_params)
@@ -78,17 +104,20 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
     ctx_params.n_batch = 512;
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // А здесь уже происходит инициализация контекста с моделю.
     ctx = llama_init_from_model(model, ctx_params);
     if (!ctx) { // <- Проверка на правильность инициализации контекста.
-        return STATUS_ERROR_INIT_CTX;
+        this->statusModel = ERROR_INIT_CTX;
+        return;
     }
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     // initialize the sampler
@@ -98,21 +127,26 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
     llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
     
     std::vector<char> formatt(llama_n_ctx(ctx));
     formatted = formatt;
 
     if (flag_stop == true) {
-        return 99;
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    return STATUS_LOAD_COMPLETE;
+    this->statusModel = LOAD_COMPLETE;
+    return;
 }
 
 std::string RunModel::TokenizationMessage(std::string message) {
+    this->statusModel = GENERATE_OUTPUT;
+
     const char* tmpl = llama_model_chat_template(model, nullptr);
 
     // add the user input to the message list and format it
@@ -132,7 +166,7 @@ std::string RunModel::TokenizationMessage(std::string message) {
     return prompt;
 }
 
-std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
+void RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
     std::string response;
 
     const bool is_first = llama_kv_self_used_cells(ctx) == 0;
@@ -145,7 +179,8 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
     }
 
     if (flag_stop == true) {
-        return "stop_thread";
+        this->statusModel = EXIT_THREAD_WIN_CLOSE;
+        return;
     }
 
     MyEventLoop evt(myEvent_MessageAiView, frame->GetId());
@@ -156,7 +191,8 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
 
     while (true) {
         if (flag_stop == true) {
-            return "stop_thread";
+            this->statusModel = EXIT_THREAD_WIN_CLOSE;
+            return;
         }
 
         // check if we have enough space in the context to evaluate this batch
@@ -197,8 +233,10 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
 
         // prepare the next batch with the sampled token
         batch = llama_batch_get_one(&new_token_id, 1);
+
         if (flag_stop == true) {
-            return "stop_thread";
+            this->statusModel = EXIT_THREAD_WIN_CLOSE;
+            return;
         }
     }
 
@@ -206,7 +244,6 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
 
     wxQueueEvent(frame, evt.Clone());
 
-    frame->statusLoadModel = STATUS_READY_GET_MESSAGE_USER;
-
-    return response;
+    this->statusModel = READY_GET_MESSAGE_USER;
+    return;
 }

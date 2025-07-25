@@ -3,9 +3,7 @@
 #include "run_model.h"
 
 MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), 
-										  TextStat{ nullptr }, statusLoadModel{ STATUS_LOAD_NOT_LOAD } {
-
-	model = new RunModel; // <- Выделение памяти под модель.
+											TextStat{ nullptr }, model{new RunModel} {
 	
 	CreateStatusBar(); // <- Создание строки состояния.
 
@@ -26,11 +24,15 @@ MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title),
 
 	bar->SetStatusText("Загрузка модели...");
 	LoadModel_th = std::thread([this]() {
-		statusLoadModel = model->InitAI("C:/Users/pipet/source/repos/My_AI-Assistent/AI-Model/Qwen3-14B-Q4_K_S.gguf", 99, 8192);
+		model->InitAI("C:/Users/pipet/source/repos/My_AI-Assistent/AI-Model/Qwen3-14B-Q4_K_S.gguf", 99, 8192);
+		
+		if (this->model->GetFlagStop() == true) {
+			return;
+		}
 
 		MyEventLoop evt(myEvent_CheckStatusLoadModel, this->GetId());
 
-		evt.SetStatusLoadModel(statusLoadModel);
+		evt.SetStatusLoadModel(model->GetStatusModel());
 		wxQueueEvent(this, evt.Clone());
 	});
 
@@ -105,21 +107,27 @@ void MyFrame::ViewMessageAI(MyEventLoop& event) {
 	messages->SetInsertionPointEnd();
 }
 
+
 void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
+	int statusModel = model->GetStatusModel();
+
 	// Проверка пустая ли строка и присвоен ли ей статус готовности к общению с пользователем.
-	if (!InputText->IsEmpty() && (statusLoadModel == STATUS_LOAD_COMPLETE || statusLoadModel == STATUS_READY_GET_MESSAGE_USER)) {
+	if (!InputText->IsEmpty() && (statusModel == LOAD_COMPLETE || statusModel == READY_GET_MESSAGE_USER)) {
 		std::string Message = static_cast<std::string>(InputText->GetValue()); // <- Достаем введенное сообщение с виджета ввода(InputText).
 		InputText->Clear();
 
 		AddMessageUser(Message); // <- Добавляем сообщения для его вывода на экран.
 
+		if (generateMessageAI_th.joinable()) {
+			generateMessageAI_th.join();
+		}
+
 		bar->SetStatusText("Генерация ответа...");
 		generateMessageAI_th = std::thread([this, Message]() {
-			statusLoadModel = STATUS_GENERATE_OUTPUT; // <- Присваиваем статус модели "генерация ответа".
 
 			std::string prompt = model->TokenizationMessage(Message);// <- Токенизация сообщения.
 
-			std::string outputAI = model->GenerateOutput(prompt, this);
+			model->GenerateOutput(prompt, this);
 		});
 
 		Refresh(); // <- Перерисовываем элементы (отвечает за цвета).
@@ -131,7 +139,7 @@ void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
 }
 
 void MyFrame::WindowClose(wxCloseEvent& evt) {
-	model->flag_stop = true;
+	model->SetFlagStop(true);
 
 	this->Hide();
 
@@ -144,29 +152,31 @@ void MyFrame::WindowClose(wxCloseEvent& evt) {
 	}
 
 	delete model;
+	model = nullptr;
 
 	Destroy();
 }
 
 void MyFrame::ShowStatusLoadModelInStatusBar(MyEventLoop& event) {
-	switch (statusLoadModel) {
-	case STATUS_LOAD_COMPLETE:
+	int statusModel = model->GetStatusModel();
+	switch (statusModel) {
+	case LOAD_COMPLETE:
 		bar->SetStatusText("Модель загружена!");
 		break;
 
-	case STATUS_ERROR_PATH_EMPTY:
+	case ERROR_PATH_EMPTY:
 		bar->SetStatusText("Ошибка: неверно указан путь до модели!");
 		break;
 
-	case STATUS_ERROR_LOAD_MODEL:
+	case ERROR_LOAD_MODEL:
 		bar->SetStatusText("Ошибка загрузки модели!");
 		break;
 
-	case STATUS_ERROR_LOAD_VOCAB:
+	case ERROR_LOAD_VOCAB:
 		bar->SetStatusText("Ошибка считывания словаря!");
 		break;
 
-	case STATUS_ERROR_INIT_CTX:
+	case ERROR_INIT_CTX:
 		bar->SetStatusText("Ошибка инициализации контекста!");
 		break;
 
