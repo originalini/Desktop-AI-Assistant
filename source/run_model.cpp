@@ -2,7 +2,7 @@
 
 RunModel::RunModel() : model{ nullptr }, vocab{ nullptr }, ctx{ nullptr }, 
                        smpl{ nullptr }, formatted{}, prev_len{ 0 }, messages{}, 
-                       model_params{}, ctx_params{}, ngl{ 0 }, n_ctx{ 0 } {
+                       model_params{}, ctx_params{}, ngl{ 0 }, n_ctx{ 0 }, flag_stop{false} {
 }
 
 RunModel::~RunModel() {
@@ -15,12 +15,20 @@ RunModel::~RunModel() {
 }
 
 int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
+    if (flag_stop == true) {
+        return 99;
+    }
+
     model_path = path; // <- Путь до модели.
     ngl = n_gpu_layers; // <- количество слоев загружаемых в видеокарту.
     n_ctx = n_context; // <- Размер контекстного окна.
     
     if (model_path.empty()) { // <- Проверка пустой ли путь до модели.
         return STATUS_ERROR_PATH_EMPTY;
+    }
+
+    if (flag_stop == true) {
+        return 99;
     }
 
     // Вывод ошибок 
@@ -30,14 +38,26 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
         }
         }, nullptr);
 
+    if (flag_stop == true) {
+        return 99;
+    }
+
     // инициализация модели
     model_params = llama_model_default_params();
     model_params.main_gpu = 1;
     model_params.n_gpu_layers = ngl;
 
+    if (flag_stop == true) {
+        return 99;
+    }
+
     model = llama_model_load_from_file(model_path.c_str(), model_params); // <- Загрузка модели.
     if (!model) { // <- Проверка загрузилась ли модель корректно
         return STATUS_ERROR_LOAD_MODEL;
+    }
+
+    if (flag_stop == true) {
+        return 99;
     }
 
     // Это словарь модели(llama_vocab)
@@ -47,11 +67,19 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
         return STATUS_ERROR_LOAD_VOCAB;
     }
 
+    if (flag_stop == true) {
+        return 99;
+    }
+
     // Тут задаются параметры  для контекста(llama_contexr_params)
     // Функция llama_context_default_params() - задает параметры загрузки контекста по умолчанию.
     ctx_params = llama_context_default_params();
     ctx_params.n_ctx = n_ctx;
     ctx_params.n_batch = 512;
+
+    if (flag_stop == true) {
+        return 99;
+    }
 
     // А здесь уже происходит инициализация контекста с моделю.
     ctx = llama_init_from_model(model, ctx_params);
@@ -59,14 +87,26 @@ int RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
         return STATUS_ERROR_INIT_CTX;
     }
 
+    if (flag_stop == true) {
+        return 99;
+    }
+
     // initialize the sampler
     smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
     llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.08f, 1));
     llama_sampler_chain_add(smpl, llama_sampler_init_temp(1.0f));
     llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+    if (flag_stop == true) {
+        return 99;
+    }
     
     std::vector<char> formatt(llama_n_ctx(ctx));
     formatted = formatt;
+
+    if (flag_stop == true) {
+        return 99;
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     return STATUS_LOAD_COMPLETE;
@@ -104,6 +144,9 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         GGML_ABORT("failed to tokenize the prompt\n");
     }
 
+    if (flag_stop == true) {
+        return "stop_thread";
+    }
 
     MyEventLoop evt(myEvent_MessageAiView, frame->GetId());
 
@@ -112,6 +155,10 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
     llama_token new_token_id;
 
     while (true) {
+        if (flag_stop == true) {
+            return "stop_thread";
+        }
+
         // check if we have enough space in the context to evaluate this batch
         int n_ctx = llama_n_ctx(ctx);
         int n_ctx_used = llama_kv_self_used_cells(ctx);
@@ -150,6 +197,9 @@ std::string RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
 
         // prepare the next batch with the sampled token
         batch = llama_batch_get_one(&new_token_id, 1);
+        if (flag_stop == true) {
+            return "stop_thread";
+        }
     }
 
     evt.SetOutputAI("\n");

@@ -62,7 +62,6 @@ private:
 
 public:
 	MyFrame(const wxString&);
-	~MyFrame();
 
 	/// Хранит статус загрузки модели.
 	int statusLoadModel;

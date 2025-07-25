@@ -2,10 +2,6 @@
 #include "UI_manager.h"
 #include "run_model.h"
 
-MyFrame::~MyFrame() {
-	delete model;
-}
-
 MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), 
 										  TextStat{ nullptr }, statusLoadModel{ STATUS_LOAD_NOT_LOAD } {
 
@@ -135,6 +131,8 @@ void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
 }
 
 void MyFrame::WindowClose(wxCloseEvent& evt) {
+	model->flag_stop = true;
+
 	this->Hide();
 
 	if (LoadModel_th.joinable()) {
@@ -145,6 +143,8 @@ void MyFrame::WindowClose(wxCloseEvent& evt) {
 		generateMessageAI_th.join();
 	}
 
+	delete model;
+
 	Destroy();
 }
 
@@ -153,17 +153,22 @@ void MyFrame::ShowStatusLoadModelInStatusBar(MyEventLoop& event) {
 	case STATUS_LOAD_COMPLETE:
 		bar->SetStatusText("Модель загружена!");
 		break;
+
 	case STATUS_ERROR_PATH_EMPTY:
 		bar->SetStatusText("Ошибка: неверно указан путь до модели!");
 		break;
+
 	case STATUS_ERROR_LOAD_MODEL:
 		bar->SetStatusText("Ошибка загрузки модели!");
 		break;
+
 	case STATUS_ERROR_LOAD_VOCAB:
 		bar->SetStatusText("Ошибка считывания словаря!");
 		break;
+
 	case STATUS_ERROR_INIT_CTX:
 		bar->SetStatusText("Ошибка инициализации контекста!");
 		break;
+
 	}
 }
