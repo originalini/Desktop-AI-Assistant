@@ -21,8 +21,9 @@ private:
 	std::vector<char> formatted;
 	int prev_len;
 public:
+	std::atomic<bool> flag_stop;
+
 	RunModel();
-	
 	~RunModel();
 
 	/*	
