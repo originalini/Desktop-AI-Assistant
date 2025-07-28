@@ -2,8 +2,7 @@
 #include "UI_manager.h"
 #include "run_model.h"
 
-MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), 
-											TextStat{ nullptr }, model{new RunModel} {
+MyFrame::MyFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title), model{new RunModel} {
 	
 	CreateStatusBar(); // <- Создание строки состояния.
 

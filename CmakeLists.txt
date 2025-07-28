@@ -15,7 +15,9 @@ add_executable(${PROJECT_NAME} WIN32    source/UI_manager.h
                                         source/Window.cpp
                                         source/Window.h
                                         source/CastomEvent.h
-                                        source/CastomEvent.cpp)
+                                        source/CastomEvent.cpp
+                                        source/TextCommandParser.h
+                                        source/TextCommandParser.cpp)
 # Найдем Clang-Tidy в системе
 find_program(CLANG_TIDY_EXE clang-tidy)
 

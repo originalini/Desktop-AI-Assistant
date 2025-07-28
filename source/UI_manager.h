@@ -40,9 +40,6 @@ private:
 	// @brief Второстепенный BoxSizer для привязки отправленных сообщений.
 	wxBoxSizer* boxSizerMessage;
 
-	// @brief Переменная для вывода введенного текста.
-	std::vector<wxStaticText*> TextStat;
-
 	// @brief Функция для обработки вывода сообщения.
 	void MessageDisplay();
 
