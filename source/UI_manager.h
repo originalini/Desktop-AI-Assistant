@@ -4,6 +4,7 @@
 
 class MyEventLoop;
 class RunModel;
+class TextCommandParser;
 
 class MyFrame : public wxFrame {
 private:

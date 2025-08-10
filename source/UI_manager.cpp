@@ -127,6 +127,7 @@ void MyFrame::OnSendButtonClickEvent(wxCommandEvent& clickButton) {
 			std::string prompt = model->TokenizationMessage(Message);// <- Токенизация сообщения.
 
 			model->GenerateOutput(prompt, this);
+
 		});
 
 		Refresh(); // <- Перерисовываем элементы (отвечает за цвета).

@@ -240,6 +240,8 @@ void RunModel::GenerateOutput(std::string prompt,MyFrame* frame) {
         }
     }
 
+    TextCommandParser parser(response); // Закидываем сгенерированное сообщение  парсер.
+
     evt.SetOutputAI("\n");
 
     wxQueueEvent(frame, evt.Clone());
