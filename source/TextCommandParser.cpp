@@ -4,30 +4,6 @@ TextCommandParser::TextCommandParser(std::string textAI) : CommandAI{} {
 	FormatingTextInCommandAI(textAI);
 }
 
-// Вынести функцию отдельно в функцию независимую
-int TextCommandParser::GetNumberInString(std::string StrNum) {
-	int number = 0;
-
-	for (int g = 0; g < StrNum.length(); ++g) {
-		if (g == 0) {
-			for (int h = 48; h <= 59; ++h) {
-				if (h == StrNum[g]) {
-					number += h - 48;
-				}
-			}
-		}
-		if (g >= 1) {
-			for (int h = 48; h <= 59; ++h) {
-				if (h == StrNum[g]) {
-					number = number * 10;
-					number += h - 48;
-				}
-			}
-		}
-	}
-	return number;
-}
-
 // 1) Сначала мы разделяем весь текст на массив слов и присваиваем его в локальный массив данной функции
 // 2) Если модель думающая то убираем текст помеченный словами (<think> ... <think>)
 // 3) В исходном тексте находим команды и присваиваем их в массив CommandAI.
