@@ -4,6 +4,10 @@
 #include <wx/richtext/richtextctrl.h>
 #include <llama.h>
 
+#include <mmdeviceapi.h>
+#include <endpointvolume.h>
+#include <comdef.h>
+#include <mmsystem.h>
 #include <vector> 
 #include <string>
 #include <thread>
@@ -12,6 +16,7 @@
 #include "UI_manager.h"
 #include "run_model.h"
 #include "CastomEvent.h"
+#include "TextCommandParser.h"
 
 enum STATUS_MODEL {
 	LOAD_NOT_LOAD = -1,													// <- Модель не загружена!
