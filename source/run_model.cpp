@@ -141,6 +141,7 @@ void RunModel::InitAI(std::string path, int n_gpu_layers, int n_context) {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     this->statusModel = LOAD_COMPLETE;
+
     return;
 }
 

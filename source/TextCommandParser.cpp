@@ -1,4 +1,5 @@
 #include "TextCommandParser.h"
+#include "InteractionWindows.h"
 
 TextCommandParser::TextCommandParser(std::string textAI) : CommandAI{} {
 	FormatingTextInCommandAI(textAI);
@@ -36,6 +37,7 @@ void TextCommandParser::FormatingTextInCommandAI(std::string textAI)  {
 		}
 	}
 
+	InteractrionWindows inter(CommandAI);
 }
 
 
